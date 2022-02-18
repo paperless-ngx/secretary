@@ -35,10 +35,10 @@ def get_responsible_teams(diff):
 
 def get_change_size(diff):
     size = 0
-    file_types = ["py", "ts"]
+    ignore_types = ["md", "txt", "lock"]
     for change in diff:
-        if change.path.split(".")[-1] in file_types:
-            size += len(change)
+        if change.path.split(".")[-1] not in ignore_types:
+            size += change.added + change.removed
     return size
 
 
@@ -50,7 +50,7 @@ thank you very much for submitting this PR to us!
 This is what will happen next:
 
 1. My robotic colleagues are currently checking your changes to see if they break anything. You can see the progress below.
-2. Once that is finished, human contributors from paperless-ngx review your changes. {review_conditions} {page_reviewers}
+2. Once that is finished, human contributors from paperless-ngx review your changes. {review_conditions}
 3. Please improve anything that comes up during the review until your pull request gets approved.
 4. Your pull request will be merged into the `dev` branch. Changes there will be tested further.
 5. Eventually, changes from you and other contributors will be merged into `master` and a new release will be made.
@@ -64,7 +64,10 @@ If any action will be required by you, please reply within a month.
 async def opened_pr(event, gh, *arg, **kwargs):
     """Mark new PRs as needing a review."""
     pull_request = event.data["pull_request"]
-    patch = PatchSet(pull_request["patch_url"])
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(pull_request["patch_url"]) as resp:
+            patch = PatchSet(await resp.text())
 
     labels = []
     small_change = get_change_size(patch) < 5
@@ -82,14 +85,12 @@ async def opened_pr(event, gh, *arg, **kwargs):
     else:
         review_conditions = "Since this is a non-trivial change, a review from at least two contributors is required."
 
-    page_reviewers = ", ".join(map(lambda x: f"@{x}", responsible))
-    if page_reviewers:
-        page_reviewers = f"Someone from {page_reviewers} should look at your PR."
-
-    comment = new_pr_template.format(user=pull_request["user"]["login"], review_conditions=review_conditions,
-                                     page_reviewers=page_reviewers)
+    comment = new_pr_template.format(user=pull_request["user"]["login"], review_conditions=review_conditions)
     print(pull_request["comments_url"], {"body": comment})
     await gh.post(pull_request["comments_url"], data={"body": comment})
+
+    team_reviewers = list(map(lambda x: f"paperless-ngx/{x}", responsible))
+    await gh.post(pull_request["url"] + "/requested_reviewers", data={"team_reviewers": team_reviewers})
 
 
 app = Application()
