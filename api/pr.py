@@ -69,11 +69,14 @@ async def opened_pr(event, gh, *arg, **kwargs):
         async with session.get(pull_request["patch_url"]) as resp:
             patch = PatchSet(await resp.text())
 
+    members = await gh.getitem("/orgs/paperless-ngx/members")
+    members = [m["login"] for m in members]
+
     user = pull_request["user"]["login"]
-    if 'dependabot' in user :
+    if 'dependabot' in user:
         print("ignoring dependabot PR")
         return
-            
+
     labels = []
     small_change = get_change_size(patch) < 5
     responsible = get_responsible_teams(patch)
@@ -90,12 +93,17 @@ async def opened_pr(event, gh, *arg, **kwargs):
     else:
         review_conditions = "Since this is a non-trivial change, a review from at least two contributors is required."
 
+    team_reviewers = list(map(lambda x: f"paperless-ngx/{x}", responsible))
+    await gh.post(pull_request["url"] + "/requested_reviewers", data={"team_reviewers": team_reviewers})
+    print(f'gh.post({pull_request["url"] + "/requested_reviewers"}, {team_reviewers})')
+
+    if user in members:
+        print("Ignoring comment for org members")
+        return
+
     comment = new_pr_template.format(user=user, review_conditions=review_conditions)
     print(pull_request["comments_url"], {"body": comment})
     await gh.post(pull_request["comments_url"], data={"body": comment})
-
-    team_reviewers = list(map(lambda x: f"paperless-ngx/{x}", responsible))
-    await gh.post(pull_request["url"] + "/requested_reviewers", data={"team_reviewers": team_reviewers})
 
 
 app = Application()
