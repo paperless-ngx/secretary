@@ -69,6 +69,11 @@ async def opened_pr(event, gh, *arg, **kwargs):
         async with session.get(pull_request["patch_url"]) as resp:
             patch = PatchSet(await resp.text())
 
+    user = pull_request["user"]["login"]
+    if 'dependabot' in user :
+        print("ignoring dependabot PR")
+        return
+            
     labels = []
     small_change = get_change_size(patch) < 5
     responsible = get_responsible_teams(patch)
@@ -85,7 +90,7 @@ async def opened_pr(event, gh, *arg, **kwargs):
     else:
         review_conditions = "Since this is a non-trivial change, a review from at least two contributors is required."
 
-    comment = new_pr_template.format(user=pull_request["user"]["login"], review_conditions=review_conditions)
+    comment = new_pr_template.format(user=user, review_conditions=review_conditions)
     print(pull_request["comments_url"], {"body": comment})
     await gh.post(pull_request["comments_url"], data={"body": comment})
 
