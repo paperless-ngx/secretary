@@ -49,7 +49,7 @@ thank you very much for submitting this PR to us!
 
 This is what will happen next:
 
-1. My robotic colleagues are currently checking your changes to see if they break anything. You can see the progress below.
+1. My robotic colleagues will check your changes to see if they break anything. You can see the progress below.
 2. Once that is finished, human contributors from paperless-ngx review your changes. {review_conditions}
 3. Please improve anything that comes up during the review until your pull request gets approved.
 4. Your pull request will be merged into the `dev` branch. Changes there will be tested further.
