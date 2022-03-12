@@ -53,7 +53,7 @@ This is what will happen next:
 2. Once that is finished, human contributors from paperless-ngx review your changes. {review_conditions}
 3. Please improve anything that comes up during the review until your pull request gets approved.
 4. Your pull request will be merged into the `dev` branch. Changes there will be tested further.
-5. Eventually, changes from you and other contributors will be merged into `master` and a new release will be made.
+5. Eventually, changes from you and other contributors will be merged into `main` and a new release will be made.
 
 Please allow up to 7 days for an initial review. We're all very excited about new pull requests but we only do this as a hobby.
 If any action will be required by you, please reply within a month.
