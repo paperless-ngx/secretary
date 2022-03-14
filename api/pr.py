@@ -38,7 +38,12 @@ def get_change_size(diff):
     ignore_types = ["md", "txt", "lock"]
     for change in diff:
         if change.path.split(".")[-1] not in ignore_types:
-            size += change.added + change.removed
+            for hunk in change:
+                for line in hunk:
+                    # Ignore whitespace and single-char lines ('{' etc.)
+                    if line.is_added and len(line.value.strip()) > 2:
+                        print(f">OOOO{size} {line}")
+                        size += 1
     return size
 
 
@@ -78,7 +83,7 @@ async def opened_pr(event, gh, *arg, **kwargs):
         return
 
     labels = []
-    small_change = get_change_size(patch) < 5
+    small_change = get_change_size(patch) < 10
     responsible = get_responsible_teams(patch)
 
     if small_change:
