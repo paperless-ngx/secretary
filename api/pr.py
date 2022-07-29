@@ -78,7 +78,7 @@ async def opened_pr(event, gh, *arg, **kwargs):
     members = [m["login"] for m in members]
 
     user = pull_request["user"]["login"]
-    if 'dependabot' in user or "paperless-l10n" in user:
+    if "dependabot" in user or "paperless-l10n" in user or "github-actions" in user:
         print(f"ignoring PR from {user}")
         return
 
