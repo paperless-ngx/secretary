@@ -1,5 +1,6 @@
 import asyncio
 import os
+import re
 import sys
 import traceback
 
@@ -31,6 +32,20 @@ def get_responsible_teams(diff):
             if change.path.startswith(responsibility):
                 teams.add(team)
     return teams
+
+
+def get_changelog_labels(branch_name):
+    additional_labels = []
+    branch_regex_labels = [
+        ("^feature", "enhancement"),
+        ("^fix", "bug")
+    ]
+
+    for branch_regex, label in branch_regex_labels:
+        if re.search(branch_regex, branch_name, re.IGNORECASE):
+            additional_labels.append(label)
+
+    return additional_labels
 
 
 def get_change_size(diff):
@@ -85,12 +100,14 @@ async def opened_pr(event, gh, *arg, **kwargs):
     labels = []
     small_change = get_change_size(patch) < 10
     responsible = get_responsible_teams(patch)
+    changelog = get_changelog_labels(pull_request["head"]["ref"])
 
     if small_change:
         labels += ["small-change"]
     else:
         labels += ["non-trivial"]
     labels += responsible
+    labels += changelog
     await gh.post(pull_request["issue_url"] + "/labels", data=labels)
 
     if small_change:
@@ -106,7 +123,8 @@ async def opened_pr(event, gh, *arg, **kwargs):
         print("Ignoring comment for org members")
         return
 
-    comment = new_pr_template.format(user=user, review_conditions=review_conditions)
+    comment = new_pr_template.format(
+        user=user, review_conditions=review_conditions)
     print(pull_request["comments_url"], {"body": comment})
     await gh.post(pull_request["comments_url"], data={"body": comment})
 
@@ -119,7 +137,8 @@ async def main(request):
     try:
         async with aiohttp.ClientSession() as session:
             access_token_response = await get_installation_access_token(
-                gh=gh_aiohttp.GitHubAPI(session, "paperless-ngx/paperless-ngx"),
+                gh=gh_aiohttp.GitHubAPI(
+                    session, "paperless-ngx/paperless-ngx"),
                 installation_id="23363758",
                 app_id="173391",
                 private_key=os.environ.get("PRIVATE_KEY")
