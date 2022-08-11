@@ -35,7 +35,7 @@ def get_responsible_teams(diff):
 
 def get_change_size(diff):
     size = 0
-    ignore_types = ["md", "txt", "lock"]
+    ignore_types = ["rst", "md", "txt", "lock"]
     for change in diff:
         if change.path.split(".")[-1] not in ignore_types:
             for hunk in change:
