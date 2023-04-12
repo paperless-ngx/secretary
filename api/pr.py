@@ -78,7 +78,7 @@ async def opened_pr(event, gh, *arg, **kwargs):
     members = [m["login"] for m in members]
 
     user = pull_request["user"]["login"]
-    if "dependabot" in user or "paperless-l10n" in user or "github-actions" in user:
+    if "github-actions" in user:
         print(f"ignoring PR from {user}")
         return
 
@@ -86,21 +86,36 @@ async def opened_pr(event, gh, *arg, **kwargs):
     small_change = get_change_size(patch) < 10
     responsible = get_responsible_teams(patch)
 
+    is_dependency_pr = "dependabot" in user
+    is_translation_pr = "paperlessngx-bot" in user and "New Crowdin updates" in pull_request["title"]
+
     if small_change:
         labels += ["small-change"]
     else:
         labels += ["non-trivial"]
+
+    if is_dependency_pr:
+        labels = ["dependencies"]
+    
     labels += responsible
+
+    if is_translation_pr:
+        labels = ["skip-changelog", "translation"]
+
     await gh.post(pull_request["issue_url"] + "/labels", data=labels)
+
+    if is_dependency_pr or is_translation_pr:
+        print(f"ignoring comment for auto-generated PR")
+        return
+
+    if user in members:
+        print("Ignoring comment for org members")
+        return
 
     if small_change:
         review_conditions = "Since this seems to be a small change, only a single contributor has to review your changes."
     else:
         review_conditions = "Since this is a non-trivial change, a review from at least two contributors is required."
-
-    if user in members:
-        print("Ignoring comment for org members")
-        return
 
     comment = new_pr_template.format(user=user, review_conditions=review_conditions)
     print(pull_request["comments_url"], {"body": comment})
