@@ -98,10 +98,6 @@ async def opened_pr(event, gh, *arg, **kwargs):
     else:
         review_conditions = "Since this is a non-trivial change, a review from at least two contributors is required."
 
-    team_reviewers = list(map(lambda x: f"paperless-ngx/{x}", responsible))
-    await gh.post(pull_request["url"] + "/requested_reviewers", data={"team_reviewers": team_reviewers})
-    print(f'gh.post({pull_request["url"] + "/requested_reviewers"}, {team_reviewers})')
-
     if user in members:
         print("Ignoring comment for org members")
         return
