@@ -87,7 +87,7 @@ async def opened_pr(event, gh, *arg, **kwargs):
     responsible = get_responsible_teams(patch)
 
     is_dependency_pr = "dependabot" in user
-    is_translation_pr = "paperlessngx-bot" in user and "New Crowdin updates" in pull_request["title"]
+    is_translation_pr = "paperlessngx-bot" in user and "Crowdin" in pull_request["title"]
 
     if small_change:
         labels += ["small-change"]
