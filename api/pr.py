@@ -50,18 +50,17 @@ def get_change_size(diff):
 new_pr_template = r"""
 Hello @{user},
 
-thank you very much for submitting this PR to us!
+Thank you very much for submitting this PR to us!
 
 This is what will happen next:
 
-1. My robotic colleagues will check your changes to see if they break anything. You can see the progress below.
-2. Once that is finished, human contributors from paperless-ngx review your changes. {review_conditions}
-3. Please improve anything that comes up during the review until your pull request gets approved.
-4. Your pull request will be merged into the `dev` branch. Changes there will be tested further.
+1. Once enabled by a maintainer, our ci tests will run against your PR to ensure quality and consistency.
+2. Next, human contributors from paperless-ngx review your changes. {review_conditions}
+3. Please address any issues that come up during the review as soon as you are able to.
+4. If accepted, your pull request will be merged into the `dev` branch and changes there will be tested further.
 5. Eventually, changes from you and other contributors will be merged into `main` and a new release will be made.
 
-Please allow up to 7 days for an initial review. We're all very excited about new pull requests but we only do this as a hobby.
-If any action will be required by you, please reply within a month.
+You'll be hearing from us soon, and thank you again for contributing to our project.
 """
 
 
