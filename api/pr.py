@@ -54,7 +54,7 @@ Thank you very much for submitting this PR to us!
 
 This is what will happen next:
 
-1. Once enabled by a maintainer, our ci tests will run against your PR to ensure quality and consistency.
+1. CI tests will run against your PR to ensure quality and consistency.
 2. Next, human contributors from paperless-ngx review your changes. {review_conditions}
 3. Please address any issues that come up during the review as soon as you are able to.
 4. If accepted, your pull request will be merged into the `dev` branch and changes there will be tested further.
